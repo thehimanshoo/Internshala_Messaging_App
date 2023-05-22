@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Peer-to-Peer Messaging App</title>
+    <script src="/peerjs/peer.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>Peer-to-Peer Messaging App</h1>
+    <div id="messages"></div>
+    <form id="message-form">
+      <input type="text" id="message-input">
+      <button type="submit">Send</button>
+    </form>
+
+    <script>
+      const socket = io();
+      const peer = new Peer();
+
+      peer.on('open', id => {
+        console.log(`Connected with ID: ${id}`);
+      });
+
+      const form = document.getElementById('message-form');
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const input = document.getElementById('message-input');
+        const message = `[${peer.id}] ${input.value}`;
+        socket.emit('chat message', message);
+        input.value = '';
+        addMessage(message);
+      });
+
+      socket.on('chat message', msg => {
+        addMessage(msg);
+      });
+
+      function addMessage(msg) {
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(msg));
+        messages.appendChild(li);
+      }
+    </script>
+  </body>
+</html>
